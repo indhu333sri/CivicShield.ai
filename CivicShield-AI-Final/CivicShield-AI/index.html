@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicShield AI — Emergency Response Platform</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ LANDING ============ -->
+  <div id="landing">
+    <div class="landing-grid"></div>
+
+    <div class="l-topline">
+      <div class="landing-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4cc3e8" stroke-width="1.8"><path d="M12 2 4 5v6c0 5.2 3.4 9.6 8 11 4.6-1.4 8-5.8 8-11V5l-8-3Z"/><path d="M9.5 12.2l1.8 1.8 3.2-3.8"/></svg>
+        <span>CIVICSHIELD AI</span>
+      </div>
+      <div class="l-online-pill"><span class="dot green pulse"></span> SIMULATION SYSTEM ONLINE</div>
+      <div class="l-status-strip" id="landingStatusStrip"></div>
+    </div>
+
+    <div class="l-main">
+      <div class="l-left">
+        <div class="l-eyebrow"><span class="dot red pulse"></span> AI-POWERED EMERGENCY RESPONSE &amp; CIVIC SAFETY</div>
+        <h1>Detect. Analyze.<br>Dispatch. Respond.</h1>
+        <p class="tag">From the first emergency report to coordinated response and resolution — CivicShield AI simulates how AI can help cities detect, prioritize and coordinate emergencies.</p>
+
+        <div class="landing-btns">
+          <button class="lbtn primary" onclick="enterCitizen()">Report Emergency</button>
+          <button class="lbtn secondary" onclick="enterCommand()">Command Center</button>
+          <button class="lbtn ghost" onclick="enterDemo()">▶ Demo Simulation</button>
+        </div>
+
+        <div class="l-workflow">
+          <div class="wf-step"><span class="wf-n">01</span><div><div class="wf-t">SOS / Report</div><div class="wf-s">Citizen reports an emergency</div></div></div>
+          <div class="wf-step"><span class="wf-n">02</span><div><div class="wf-t">AI Triage</div><div class="wf-s">Type, severity &amp; priority identified</div></div></div>
+          <div class="wf-step"><span class="wf-n">03</span><div><div class="wf-t">Dispatch</div><div class="wf-s">Best available unit selected</div></div></div>
+          <div class="wf-step"><span class="wf-n">04</span><div><div class="wf-t">Live GPS</div><div class="wf-s">Location &amp; ETA tracked in real time</div></div></div>
+          <div class="wf-step"><span class="wf-n">05</span><div><div class="wf-t">Hospital</div><div class="wf-s">AI recommends the right facility</div></div></div>
+          <div class="wf-step"><span class="wf-n">06</span><div><div class="wf-t">Resolved</div><div class="wf-s">Incident closed &amp; recorded</div></div></div>
+        </div>
+      </div>
+
+      <div class="l-right">
+        <div class="l-map-card">
+          <div class="l-map-head">
+            <span class="l-map-title"><span class="dot red pulse"></span> ACTIVE EMERGENCY — SIMULATED</span>
+            <span class="demo-flag">SIMULATED DATA</span>
+          </div>
+          <div id="landingMap"></div>
+          <div class="l-map-overlay" id="landingIncCard"></div>
+        </div>
+        <div class="l-map-trace" id="landingTrace"></div>
+      </div>
+    </div>
+
+    <div class="landing-foot">SIMULATION ENVIRONMENT · NO REAL EMERGENCY SERVICES CONNECTED — all incidents, units and hospitals shown are simulated prototype data</div>
+  </div>
+
+  <!-- ============ CITIZEN ============ -->
+  <div id="citizen">
+    <div class="phone">
+      <button class="c-exit" onclick="exitToLanding()">← EXIT</button>
+      <div class="c-header">
+        <div class="c-brand">CIVICSHIELD AI</div>
+        <div class="c-loc"><span class="dot green"></span> <span id="citizenLoc">Anna Nagar, Chennai</span></div>
+      </div>
+      <div class="c-body" id="citizenBody"></div>
+    </div>
+  </div>
+
+  <!-- ============ COMMAND CENTER ============ -->
+  <div id="command">
+    <div class="topbar">
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#4cc3e8" stroke-width="1.8" width="16" height="16"><path d="M12 2 4 5v6c0 5.2 3.4 9.6 8 11 4.6-1.4 8-5.8 8-11V5l-8-3Z"/></svg>
+        CIVICSHIELD
+      </div>
+      <div class="tb-live"><span class="dot red pulse"></span> LIVE</div>
+      <div class="tb-sep"></div>
+      <div class="tb-item mono" id="tbTime">--:--:--</div>
+      <div class="tb-sep"></div>
+      <div class="tb-item"><b id="tbActiveCount">0</b> active incidents</div>
+      <div class="tb-item"><b id="tbAmbCount">0</b> ambulances available</div>
+      <div class="tb-item"><span class="dot green"></span> System operational</div>
+      <div class="tb-spacer"></div>
+      <input class="tb-search" id="tbSearch" placeholder="Search incident, unit, hospital…" oninput="handleSearch(this.value)">
+      <div class="demo-flag">DEMO / SIMULATION DATA</div>
+      <button class="tb-exit" onclick="exitToLanding()">Exit</button>
+    </div>
+
+    <div class="sidebar">
+      <div class="sb-nav" id="sbNav"></div>
+      <div class="sb-foot"><span class="dot green"></span> All systems operational</div>
+    </div>
+
+    <div class="main">
+      <div class="view" id="view-overview">
+        <div class="map-wrap">
+          <div id="map"></div>
+          <div class="map-toolbar">
+            <button class="map-btn on" id="layerInc" onclick="toggleLayer('inc')">🔴 Incidents</button>
+            <button class="map-btn on" id="layerAmb" onclick="toggleLayer('amb')">🚑 Ambulances</button>
+            <button class="map-btn on" id="layerHosp" onclick="toggleLayer('hosp')">🏥 Hospitals</button>
+            <button class="map-btn on" id="layerUnits" onclick="toggleLayer('units')">👮 Units</button>
+            <button class="map-btn" onclick="recenterMap()">⟳ Recenter</button>
+          </div>
+          <div class="sim-badge">
+            <span id="simState" style="color:var(--green); font-weight:700;">● LIVE SIMULATION</span>
+            <div class="sim-ctl">
+              <button onclick="toggleSim()" id="simToggleBtn" title="Pause/Resume">⏸</button>
+              <button onclick="resetSimulation()" title="Reset simulation">↻</button>
+              <button onclick="toggleSimSpeed()" id="simSpeedBtn" title="Simulation speed">1×</button>
+              <button onclick="triggerRandomEmergency()" title="Trigger emergency">⚡</button>
+            </div>
+          </div>
+          <div class="map-legend">
+            <div class="row"><span class="dot red"></span> Emergency incident</div>
+            <div class="row">🚑 Ambulance</div>
+            <div class="row">🏥 Hospital</div>
+            <div class="row">👮 Police / 🚒 Fire</div>
+          </div>
+        </div>
+        <div class="side-panel">
+          <div class="sp-head"><h3>AI PRIORITY QUEUE</h3><span class="badge critical" id="pqCount">0</span></div>
+          <div class="sp-body" id="priorityQueue"></div>
+          <div class="sp-head" style="border-top:1px solid var(--border);"><h3>ACTIVITY FEED</h3></div>
+          <div class="sp-body" id="activityFeed" style="max-height:260px;"></div>
+        </div>
+      </div>
+
+      <div class="view list-view" id="view-incidents">
+        <div class="lv-head"><div><h2>Live Incidents</h2><div class="sub" id="incSub">— active incidents</div></div>
+          <button class="btn primary" onclick="triggerRandomEmergency()">+ Simulate New Incident</button></div>
+        <div class="lv-body"><div class="card-grid" id="incidentsGrid"></div></div>
+      </div>
+
+      <div class="view list-view" id="view-ambulances">
+        <div class="lv-head"><div><h2>Ambulances</h2><div class="sub" id="ambSub">— fleet units</div></div></div>
+        <div class="lv-body"><div class="card-grid" id="ambulancesGrid"></div></div>
+      </div>
+
+      <div class="view list-view" id="view-hospitals">
+        <div class="lv-head"><div><h2>Hospitals</h2><div class="sub">Capacity & acceptance status</div></div></div>
+        <div class="lv-body"><div class="card-grid" id="hospitalsGrid"></div></div>
+      </div>
+
+      <div class="view list-view" id="view-police">
+        <div class="lv-head"><div><h2>Police Units</h2><div class="sub">Field patrol status</div></div></div>
+        <div class="lv-body"><div class="card-grid" id="policeGrid"></div></div>
+      </div>
+
+      <div class="view list-view" id="view-fire">
+        <div class="lv-head"><div><h2>Fire Units</h2><div class="sub">Station & apparatus status</div></div></div>
+        <div class="lv-body"><div class="card-grid" id="fireGrid"></div></div>
+      </div>
+
+      <div class="view list-view" id="view-ai">
+        <div class="lv-head"><div><h2>AI Intelligence</h2><div class="sub">Classification, prioritization &amp; civic decision-support insights (simulated)</div></div></div>
+        <div class="lv-body" id="aiIntelBody"></div>
+      </div>
+
+      <div class="view list-view" id="view-analytics">
+        <div class="lv-head"><div><h2>Analytics</h2><div class="sub">Today — simulated period</div></div></div>
+        <div class="lv-body" id="analyticsBody"></div>
+      </div>
+
+      <div class="view list-view" id="view-system">
+        <div class="lv-head"><div><h2>System</h2><div class="sub">Platform status</div></div></div>
+        <div class="lv-body" id="systemBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- overlays -->
+  <div class="overlay hidden" id="incidentModalOverlay"><div class="modal modal-lg" id="incidentModal"></div></div>
+  <div class="overlay hidden" id="unitModalOverlay"><div class="modal" id="unitModal"></div></div>
+  <div class="overlay hidden" id="sosConfirmOverlay">
+    <div class="modal" style="width:340px;">
+      <div class="modal-body" style="text-align:center; padding-top:26px;">
+        <div style="font-size:15px; font-weight:700; margin-bottom:8px;">Send emergency alert?</div>
+        <div style="font-size:12.5px; color:var(--text-dim); line-height:1.5;">Your location will be shared with CivicShield AI and the nearest response unit will be notified.</div>
+      </div>
+      <div class="modal-foot" style="justify-content:center;">
+        <button class="btn secondary" onclick="closeOverlay('sosConfirmOverlay')">Cancel</button>
+        <button class="btn danger" onclick="sendSOS()">Send SOS</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+</div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
